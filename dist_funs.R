@@ -1,20 +1,20 @@
 euclid <- function(x, y) {
-    stopifnot(length(x) == length(y))
+    assert_that(length(x) == length(y))
     sqrt(sum((y - x) ^ 2))
 }
 
 manhattan <- function(x,y) {
-    stopifnot(length(x) == length(y))
-    sum(abs(y-x))
+    assert_that(length(x) == length(y))
+    sum(abs(y - x))
 }
 
 distance <- function(x, y, distfun = euclid) {
     if(missing(x) || missing(y)) stop("\"x\" and \"y\" must be specified")
-    useMethod("distance", x, y = y, distfun = distfun)
+    UseMethod("distance")
 }
 
 distance.vector <- function(x, y, distfun = euclid) {
-    distfun(x,y)
+    distfun(x, y)
 }
 
 distance.data.frame <- function(x, y, distfun = euclid) {
@@ -23,20 +23,20 @@ distance.data.frame <- function(x, y, distfun = euclid) {
     NextMethod(data.matrix(x), y, distfun)
 }
 
-distance.matrix <- function(x, y, distfun = euclid, apply) {
+distance.matrix <- function(x, y, distfun = euclid) {
     if (is.matrix(y)) {
-        stopifnot(nrow(x) == nrow(y))
+        assert_that(ncol(x) == ncol(y))
         ## Make matrix. As many rows as there are centroids, as many 
         ## columns as there are samples    
-        apply(x, 2, function(col) {
-            apply(y, 2, function(row) {
-                distfun(col, row)
+        apply(x, 1, function(i) {
+            apply(y, 1, function(j) {
+                distfun(i, j)
             })
         })
     } else if (is.vector(y)) {
-        apply(x, 2, function(col) {
-            sapply(y, function(row) {
-                distfun(col, row)
+        apply(x, 1, function(i) {
+            sapply(y, function(j) {
+                distfun(i, j)
             })
         })
     } else stop("Unsupported format for y")

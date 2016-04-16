@@ -1,65 +1,74 @@
 ## Major todo: t() everything, normal matrix format not exprseset format
-
-k_means <- function(data_matrix, k, max_iterations = 10000000000, 
-    distfun = euclid) {
+k_means <- function(data_matrix, k, max_iter = 10^6, distfun = euclid) {
+    original_data_matrix <- data_matrix
     if(is.data.frame(data_matrix) && !all(sapply(data_matrix, is.numeric))) {
-        cat("data_matrix is not all numeric... \n Coercing to numeric")
+        cat("data_matrix is not all numeric...\nCoercing to numeric\n")
         char_cols <- sapply(data_matrix, is.character)
         data_matrix[, char_cols] <- lapply(data_matrix[, char_cols], 
-            function(col) as.numeric(as.factor(col)))
+            function(col) as.factor(col))
+        data_matrix <- data.matrix(data_matrix) 
     }
     #initialising local variables
     samples <- nrow(data_matrix)
     features <- ncol(data_matrix)
-    iter <- 1
-    
-    stopifnot(k < samples)
+    assert_that(k < samples)
     centroid_matrix <- data_matrix[sample(samples, k), ]
-
     SSE <- 0
-    while(iter < max_iterations) { 
-        distance_matrix <- distance(data_matrix, centroid_matrix, distfun)
-
+    iter <- 1
+    while(iter < max_iter) { 
         if (iter > 1) old_membership_vector <- membership_vector
-
-        membership_vector <- compute_membership_vector(distance_matrix)
+        
+        distance_matrix <- distance(data_matrix, centroid_matrix, distfun)
+        membership_vector <- apply(distance_matrix, 2, which.min)
 
         old_centroid_matrix <- centroid_matrix
-        centroid_matrix <- recompute_centroid_location(data_matrix, membership_vector)
-
+        centroid_matrix <- t(sapply(sort(unique(membership_vector)), 
+            function(i) {
+                colMeans(data_matrix[membership_vector == i, ])
+            }
+        ))
 
         for (i in 1:k) {
-            distance_moved <- fields::rdist.vec(old_centroid_matrix, centroid_matrix)
+            distance_moved <- fields::rdist.vec(
+                old_centroid_matrix, 
+                centroid_matrix
+            )
         }
 
         oldSSE <- SSE
         SSE <- 0
         #SSE calculation
-        ## Garbage way of doing that
-        for (i in 1:k) {
-            centroid <- centroid_matrix[i, ]
-            for (j in 1:sum(membership_vector %in% i)) {
-                SSE <- SSE + distfun(data_matrix[j, ], centroid) ^ 2
-            }
-        }
-        #oldSSE- SSE >
-
-
-        #could change if structure to change escape 
+        ## Probably rewrite entirely, this is garbage
+        SSE <- sum(apply(centroid_matrix, 1, 
+            function(centroid ) {
+                sapply(unique(membership_vector) function(j) {
+                    distfun(data_matrix[membership_vector == j, ], centroid) ^ 2
+                })
+            })
+        )
 
         iter <- iter + 1
         if (iter >= 3) {
-            if ((oldSSE - SSE) < 0.01) break
-            else if (distance_moved < 0.01) break
-            else if (identical(membership_vector, old_membership_vector))
-                return(structure())
+            if ((oldSSE - SSE) < 0.01) || 
+                distance_moved < 0.01 || 
+                identical(membership_vector, old_membership_vector)) {
+                out <- structure(list(), 
+                    class = "k_means")
+                return(out)
+            }
         }
     }
-    structure(
+    structure(list(
         "membership_vector" = membership_vector,
+        "data_matrix" = original_data_matrix,
+        "k" = k,
         "iterations" = iter,
-        "old membership vector" = old_membership_vector,
-        totalsse = sse,
-        betweensse=sse,
-        class = "k_means")
+        "totalsse" = sse,
+        "betweensse" = sse),
+        class = c("k_means", "clusterobject"))
+}
+
+
+x_means <- function(data_matrix, k, max_k, distfun = euclid) {
+    assert_that()
 }
