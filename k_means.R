@@ -38,7 +38,7 @@ k_means <- function(data_matrix, k, max_iter = 10^6, distfun = euclid) {
         oldSSE <- SSE
         SSE <- 0
         #SSE calculation
-        ## Probably rewrite entirely, this is garbage
+        ## within, total, totalwithin, between
         SSE <- sum(apply(centroid_matrix, 1, 
             function(centroid ) {
                 sapply(unique(membership_vector) function(j) {

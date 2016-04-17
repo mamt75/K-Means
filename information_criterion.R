@@ -23,7 +23,7 @@ BIC.k_means
 
 
 logLik.kmeans <- function(object) structure(
-    object$tot.withinss,
+    object[["tot.withinss"]],
     df = nrow(object[["centers"]]) * ncol(object[["centers"]]),
     nobs = length(object[["cluster"]])
 )
@@ -35,4 +35,29 @@ logLik.k_means <- function(object) structure(
 )
 
 
+
+
+BIC.kmeans <- function(kmeans) {
+    R <- length(means[["cluster"]])
+    Rn <- length(kmeans[["cluster"]]
+
+    -(Rn/2) * log(2 * pi) - ((Rn * )/ 2) + Rn * log(Rn) 0 Rnlog(R)
+}
+
+
+
 # http://stackoverflow.com/questions/15839774/how-to-calculate-bic-for-k-means-clustering-in-r
+
+## Unfinished but could probably finish just with this
+xmeans <- function(data, start_k = 2, max_k,  = "BIC") {
+    k <- start_k
+    while(k < max_k) {
+        kmeans <- kmeans(data, centers = k)
+        bic <- BIC(kmeans)
+        for(i in 1:k) {
+            this_cluster <- kmeans[["cluster"]] == i
+            new_kmeans <- kmeans(data[this_cluster, ], centers = 2)
+
+        }
+    }
+}
