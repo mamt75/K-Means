@@ -52,8 +52,14 @@ k_means <- function(data_matrix, k, max_iter = 10^6, distfun = euclid) {
             if ((oldSSE - SSE) < 0.01) || 
                 distance_moved < 0.01 || 
                 identical(membership_vector, old_membership_vector)) {
-                out <- structure(list(), 
-                    class = "k_means")
+                structure(list(
+                    "membership_vector" = membership_vector,
+                    "data_matrix" = original_data_matrix,
+                    "k" = k,
+                    "iterations" = iter,
+                    "totalsse" = sse,
+                    "betweensse" = sse),
+                    class = c("k_means", "clusterobject"))
                 return(out)
             }
         }
@@ -69,6 +75,29 @@ k_means <- function(data_matrix, k, max_iter = 10^6, distfun = euclid) {
 }
 
 
+# totss   
+# The total sum of squares.
+
+# withinss    
+# Vector of within-cluster sum of squares, one component per cluster.
+
+# tot.withinss    
+# Total within-cluster sum of squares, i.e. sum(withinss).
+
+# betweenss   
+# The between-cluster sum of squares, i.e. totss-tot.withinss.
+
+# size    
+# The number of points in each cluster.
+
+# iter    
+# The number of (outer) iterations.
+
+
 x_means <- function(data_matrix, k, max_k, distfun = euclid) {
     assert_that()
 }
+
+
+
+
